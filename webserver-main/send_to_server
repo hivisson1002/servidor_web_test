@@ -1,0 +1,40 @@
+#!/usr/bin/env python3
+"""
+A generic script to write to any request on any host, port.
+
+./send_to_server <host> <port> <"request">
+"""
+import argparse
+import socket
+
+# Max size of data read from a socket
+MAX_DATA_SIZE = 1024
+
+# Encoding style
+STYLE = "utf-8"
+
+def handle_request(args):
+    """
+    Sends the request to the server listening at host, port
+    and prints in case there is a reply from server side.
+    """
+    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    client_socket.connect((args.host, int(args.port)))
+    client_socket.sendall(args.request.encode(STYLE))
+    data = client_socket.recv(MAX_DATA_SIZE)
+    if data:
+        print(data.decode(STYLE))
+
+
+def main():
+    parser = argparse.ArgumentParser(description="A client script to talk to a generic server") 
+    
+    parser.add_argument("host")
+    parser.add_argument("port")
+    parser.add_argument("request") # Request must be enclosed in "" 
+    args = parser.parse_args()
+
+    handle_request(args)
+
+if __name__ == '__main__':
+    main()    
