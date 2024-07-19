@@ -13,6 +13,14 @@ import time
 CLIENTES = 5
 
 def enviar_requisicao_http(host, porta, endpoint):
+    """
+    Envia uma única requisição HTTP para o servidor especificado.
+    
+    Args:
+        host (str): Endereço do servidor.
+        porta (str): Porta do servidor.
+        endpoint (str): Endpoint a ser acessado (cpu ou io).
+    """
     url = f"http://{host}:{porta}/{endpoint}"
     inicio = time.time()
     resposta = requests.get(url)
@@ -22,24 +30,37 @@ def enviar_requisicao_http(host, porta, endpoint):
     #print("\n")
 
 def enviar_requisicoes_paralelas(host, porta, endpoint):
+    """
+    Envia múltiplas requisições HTTP em paralelo usando processos.
+    
+    Args:
+        host (str): Endereço do servidor.
+        porta (str): Porta do servidor.
+        endpoint (str): Endpoint a ser acessado (cpu ou io).
+    """
     processos = []
     for i in range(CLIENTES):
+        # Cria um processo para cada requisição HTTP
         p = multiprocessing.Process(target=enviar_requisicao_http, args=(host, porta, endpoint))
         processos.append(p)
     inicio = time.time()
     for processo in processos:
-        processo.start()
+        processo.start()  # Inicia cada processo
 
     for processo in processos:
-        processo.join()
+        processo.join()  # Espera cada processo terminar
 
     fim = time.time()
-    # Note que isso inclui o tempo de criação
-    # e término do processo. Assumindo que é minúsculo
-    # comparado ao tempo tomado pelas requisições http.
+    # Note que isso inclui o tempo de criação e término do processo
     print(f"Tempo total levado {(fim-inicio)*1000:.2f} ms")
 
 def obter_args():
+    """
+    Obtém e parseia os argumentos da linha de comando.
+    
+    Returns:
+        args (Namespace): Argumentos parseados.
+    """
     parser = argparse.ArgumentParser(description="Um script para testar o desempenho de um servidor genérico")
     parser.add_argument("-c", "--cpu", action='store_true',
                          help="Flag para testar o desempenho de tarefas consumidoras de CPU")
@@ -52,6 +73,9 @@ def obter_args():
     return args
 
 def main():
+    """
+    Função principal que coordena o envio de requisições com base nos argumentos fornecidos.
+    """
     args = obter_args()
     endpoint = ""
     if args.cpu:
@@ -68,6 +92,5 @@ def main():
 
     enviar_requisicoes_paralelas(args.host, args.porta, endpoint)
     
-
 if __name__ == '__main__':
     main()
